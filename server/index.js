@@ -23,6 +23,10 @@ app.use('/api/auth', authRoutes);
 app.use('/api/donations', donationRoutes);
 app.use('/api/events', eventRoutes);
 
+app.get("/", (req, res) => {
+  res.send("API is running 🚀");
+});
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
