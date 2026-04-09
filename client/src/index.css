@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@theme {
+  --color-saffron: #f97316; /* Tailwind orange-500 equivalent */
+  --color-saffron-dark: #ea580c; /* Tailwind orange-600 */
+  --color-gold: #fbbf24; /* Tailwind amber-400 equivalent */
+  --color-gold-dark: #f59e0b; /* Tailwind amber-500 */
+  --color-dark: #121212;
+  --color-dark-light: #1e1e1e;
+  --color-text-light: #f3f4f6;
+  --font-heading: 'inter', sans-serif;
+  --font-body: 'inter', sans-serif;
+}
+
+body {
+  background-color: var(--color-dark);
+  color: var(--color-text-light);
+  font-family: var(--font-body);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+}
+
+.text-saffron {
+  color: var(--color-saffron);
+}
+
+.bg-saffron {
+  background-color: var(--color-saffron);
+}
+
+.text-gold {
+  color: var(--color-gold);
+}
+
+/* Custom scrollbar for a premium look */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-saffron-dark);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gold);
+}
