@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { FaQrcode, FaCopy, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
+import { FaQrcode, FaCopy, FaCheckCircle, FaExclamationCircle, FaDownload } from 'react-icons/fa';
+import { downloadReceiptPDF } from '../utils/generateReceipt';
 
 const Donate = () => {
   const { t } = useTranslation();
@@ -14,6 +15,7 @@ const Donate = () => {
     note: ''
   });
   const [status, setStatus] = useState({ type: '', message: '' });
+  const [successDonation, setSuccessDonation] = useState(null);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -74,6 +76,7 @@ const Donate = () => {
               razorpay_signature: response.razorpay_signature
             });
             setStatus({ type: 'success', message: 'Payment verified! Thank you for your contribution. Receipt sent to your contact.' });
+            setSuccessDonation(verifyRes.data.donation);
             setFormData({ name: '', contact: '', amount: '', paymentMethod: 'razorpay', transactionId: '', note: '' });
           } catch (err) {
             setStatus({ type: 'error', message: 'Payment verification failed. Please contact admin.' });
@@ -130,6 +133,7 @@ const Donate = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setSuccessDonation(null);
     setStatus({ type: 'info', message: 'Processing your request...' });
 
     if (formData.paymentMethod === 'razorpay') {
@@ -188,13 +192,24 @@ const Donate = () => {
             <p className="text-gray-400 text-sm mb-6">Choose Razorpay for instant verification, or UPI QR scan if you prefer to upload details manually.</p>
             
             {status.message && (
-              <div className={`p-4 rounded-xl mb-6 flex items-start gap-3 ${
+              <div className={`p-4 rounded-xl mb-6 flex flex-col items-start gap-3 ${
                 status.type === 'success' ? 'bg-green-900/30 text-green-400 border border-green-500/30' : 
                 status.type === 'info' ? 'bg-blue-900/30 text-blue-400 border border-blue-500/30' :
                 'bg-red-900/30 text-red-400 border border-red-500/30'
               }`}>
-                {status.type === 'success' ? <FaCheckCircle className="mt-1 flex-shrink-0" /> : <FaExclamationCircle className="mt-1 flex-shrink-0"/>}
-                <span className="text-sm">{status.message}</span>
+                <div className="flex items-start gap-3">
+                  {status.type === 'success' ? <FaCheckCircle className="mt-1 flex-shrink-0" /> : <FaExclamationCircle className="mt-1 flex-shrink-0"/>}
+                  <span className="text-sm">{status.message}</span>
+                </div>
+                {status.type === 'success' && successDonation && (
+                  <button 
+                    type="button"
+                    onClick={() => downloadReceiptPDF(successDonation)}
+                    className="mt-2 bg-green-600/50 hover:bg-green-500/50 border border-green-400/50 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition"
+                  >
+                    <FaDownload /> Download PDF Receipt
+                  </button>
+                )}
               </div>
             )}
 

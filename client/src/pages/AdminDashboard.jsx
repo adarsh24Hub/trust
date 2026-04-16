@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaRupeeSign, FaUsers, FaCalendarAlt, FaSignOutAlt, FaPlus, FaTrash, FaTimes, FaCheck, FaImage } from 'react-icons/fa';
+import { FaRupeeSign, FaUsers, FaCalendarAlt, FaSignOutAlt, FaPlus, FaTrash, FaTimes, FaCheck, FaImage, FaDownload } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
+import { downloadReceiptPDF } from '../utils/generateReceipt';
 
 const AdminDashboard = () => {
   const { t } = useTranslation();
@@ -355,6 +356,11 @@ const AdminDashboard = () => {
                                   <FaTimes />
                                 </button>
                               </>
+                            )}
+                            {d.status === 'verified' && (
+                              <button onClick={() => downloadReceiptPDF(d)} className="text-blue-400 bg-blue-500/10 p-2 rounded hover:bg-blue-500/30 transition-colors" title="Download Official Receipt">
+                                <FaDownload />
+                              </button>
                             )}
                             <button onClick={() => handleDeleteDonation(d._id)} className="text-gray-400 hover:text-red-500 p-2 rounded transition-colors" title="Delete record">
                               <FaTrash />
