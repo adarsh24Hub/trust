@@ -1,114 +1,107 @@
-import { jsPDF } from 'jspdf';
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas"; // We will use HTML rendering to fix Hindi text shaping!
 
 export const downloadReceiptPDF = async (donation) => {
-  const doc = new jsPDF({
-    orientation: 'portrait',
-    unit: 'mm',
-    format: 'a5'
-  });
-
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
-
-  // Add Background Color / Border
-  doc.setDrawColor(249, 115, 22); // Saffron color
-  doc.setLineWidth(1.5);
-  doc.rect(5, 5, pageWidth - 10, pageHeight - 10);
-  
-  // Inner border
-  doc.setDrawColor(255, 215, 0); // Gold color
-  doc.setLineWidth(0.5);
-  doc.rect(7, 7, pageWidth - 14, pageHeight - 14);
-
-  // Helper to load image
-  const loadImage = (url) => {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.src = url;
-      img.onload = () => resolve(img);
-      img.onerror = () => resolve(null);
-    });
-  };
-
-  // Try loading the logo
-  try {
-    const logo = await loadImage('/logo.png');
-    if (logo) {
-      // Draw logo centered at top
-      doc.addImage(logo, 'PNG', (pageWidth / 2) - 12, 10, 24, 24);
-    }
-  } catch(e) {
-    console.warn('Logo could not be loaded into PDF', e);
-  }
-
-  // Header
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(16);
-  doc.setTextColor(220, 38, 38); // Dark Red
-  let startY = 40;
-  doc.text('Mata Kali Sadanand Sadbhavana Trust', pageWidth / 2, startY, { align: 'center' });
-  
-  doc.setFontSize(10);
-  doc.setTextColor(100, 100, 100);
-  doc.setFont('helvetica', 'normal');
-  doc.text('Registration No: MKSST-2026', pageWidth / 2, startY + 5, { align: 'center' });
-  doc.text('Mata Kali Dham, Sirathu, Kaushambi', pageWidth / 2, startY + 10, { align: 'center' });
-
-  // Divider
-  doc.setDrawColor(200, 200, 200);
-  doc.line(15, startY + 15, pageWidth - 15, startY + 15);
-
-  // Receipt Title
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(14);
-  doc.setTextColor(0, 0, 0);
-  doc.text('DONATION RECEIPT', pageWidth / 2, startY + 25, { align: 'center' });
-
-  // Details Wrapper Settings
-  doc.setFontSize(11);
-  const leftX = 15;
-  const valueX = 50;
-  let detailY = startY + 38;
-  const rowH = 8;
-  
   // Data Mapping
-  const receiptNo = donation.receiptId || `RCPT-MKS-${Math.floor(Math.random() * 899999 + 100000)}`;
-  const dateStr = donation.createdAt ? new Date(donation.createdAt).toLocaleDateString() : new Date().toLocaleDateString();
-  const donorName = donation.name || 'Anonymous';
-  const amount = donation.amount ? `Rs. ${donation.amount.toLocaleString()}` : '-';
-  const paymentMode = donation.method ? donation.method.toUpperCase() : '-';
-  const txnId = donation.transactionId || donation.paymentId || 'N/A';
+  const receiptNo = donation.receiptId || `RCPT-${Math.floor(Math.random() * 100000)}`;
+  const dateStr = new Date().toLocaleDateString("hi-IN");
 
-  const details = [
-    { label: 'Receipt No. :', value: receiptNo },
-    { label: 'Date :', value: dateStr },
-    { label: 'Received from :', value: donorName },
-    { label: 'Amount :', value: amount },
-    { label: 'Payment Mode :', value: paymentMode },
-    { label: 'Transaction ID :', value: txnId }
-  ];
+  // To fix Hindi character rendering (Text Shaping), we map it into HTML first. 
+  // jsPDF's built-in text drawing does not support complex devanagari characters (like Half letters and Matras).
+  const container = document.createElement("div");
+  container.style.position = "absolute";
+  container.style.left = "-9999px";
+  container.style.top = "-9999px";
 
-  details.forEach(item => {
-    doc.setFont('helvetica', 'bold');
-    doc.text(item.label, leftX, detailY);
-    doc.setFont('helvetica', 'normal');
-    doc.text(item.value, valueX, detailY);
-    detailY += rowH;
+  // A5 dimensions for rendering (width: 148mm, height: 210mm) -> Scale to ~ 560 x 794
+  container.innerHTML = `
+    <div id="receipt-capture-box" style="width: 560px; height: 794px; background: white; padding: 15px; box-sizing: border-box; font-family: 'Noto Sans Devanagari', 'Arial Unicode MS', 'Mangal', sans-serif;">
+       <div style="border: 4px solid #f97316; height: 100%; box-sizing: border-box; padding: 4px;">
+           <div style="border: 2px solid #ffd700; height: 100%; box-sizing: border-box; padding: 30px; position: relative;">
+               
+               <!-- Header -->
+               <div style="text-align: center; margin-top: 10px;">
+                   <img src="/logo.png" alt="Logo" style="width: 80px; height: 80px; object-fit: contain; margin-bottom: 10px;" />
+                   <h1 style="color: #dc2626; font-size: 26px; margin: 0; font-weight: bold;">माता काली सदानंद सद्भावना ट्रस्ट</h1>
+                   <p style="color: #444; font-size: 14px; margin: 8px 0 0 0;">पंजीकरण संख्या : MKSST-2026</p>
+                   <p style="color: #444; font-size: 14px; margin: 4px 0 0 0;">माता काली धाम, आंबा सदानंद का पूरा कौंधियारा, प्रयागराज</p>
+               </div>
+
+               <!-- Divider -->
+               <hr style="margin: 25px 0; border: 0; border-top: 1.5px solid #ccc;" />
+
+               <!-- Title -->
+               <div style="text-align: center; margin-bottom: 30px;">
+                   <h2 style="margin: 0; font-size: 20px; font-weight: bold; color: #000;">दान रसीद</h2>
+               </div>
+
+               <!-- Table Data -->
+               <table style="width: 100%; font-size: 16px; border-collapse: separate; border-spacing: 0 12px; color: #000;">
+                   <tr>
+                       <td style="width: 45%; font-weight: bold;">रसीद संख्या :</td>
+                       <td style="width: 55%;">${receiptNo}</td>
+                   </tr>
+                   <tr>
+                       <td style="font-weight: bold;">दिनांक :</td>
+                       <td>${dateStr}</td>
+                   </tr>
+                   <tr>
+                       <td style="font-weight: bold;">दानदाता का नाम :</td>
+                       <td>${donation.name || "आपका नाम"}</td>
+                   </tr>
+                   <tr>
+                       <td style="font-weight: bold;">दान राशि :</td>
+                       <td>₹ ${donation.amount || "-"}</td>
+                   </tr>
+                   <tr>
+                       <td style="font-weight: bold;">भुगतान माध्यम :</td>
+                       <td>${donation.method || "ऑनलाइन"}</td>
+                   </tr>
+                   <tr>
+                       <td style="font-weight: bold;">लेन-देन आईडी :</td>
+                       <td>${donation.transactionId || "N/A"}</td>
+                   </tr>
+               </table>
+
+               <!-- Bottom Blessing -->
+               <div style="position: absolute; bottom: 100px; width: calc(100% - 60px); text-align: center;">
+                 <p style="font-size: 15px; margin: 0; color: #000;">माँ काली की कृपा आप एवं आपके परिवार पर सदैव बनी रहे।</p>
+               </div>
+
+               <!-- Signature -->
+               <div style="position: absolute; bottom: 50px; right: 30px;">
+                   <p style="font-weight: bold; margin: 0; font-size: 16px; color: #000;">अधिकृत हस्ताक्षरकर्ता</p>
+               </div>
+
+               <!-- Disclaimer -->
+               <div style="position: absolute; bottom: 20px; width: calc(100% - 60px); text-align: center;">
+                   <p style="color: #777; font-size: 12px; margin: 0;">यह रसीद ट्रस्ट द्वारा डिजिटल रूप से जारी की गई है एवं मान्य है।</p>
+               </div>
+           </div>
+       </div>
+    </div>
+  `;
+
+  document.body.appendChild(container);
+
+  // Use HTML2Canvas to capture the perfectly formatted Hindi Text
+  const element = document.getElementById("receipt-capture-box");
+  const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+  const imgData = canvas.toDataURL("image/png");
+  
+  // Cleanup
+  document.body.removeChild(container);
+
+  // Generate jsPDF and paste image
+  const doc = new jsPDF({
+    orientation: "portrait",
+    unit: "mm",
+    format: "a5",
   });
 
-  // Footer / Signatory
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'italic');
-  doc.text('May Maa Kali bless you and your family.', pageWidth / 2, detailY + 15, { align: 'center' });
-
-  doc.setFont('helvetica', 'bold');
-  doc.text('Authorized Signatory', pageWidth - 15, pageHeight - 15, { align: 'right' });
+  const pdfWidth = doc.internal.pageSize.getWidth();
+  const pdfHeight = doc.internal.pageSize.getHeight();
   
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.setTextColor(150, 150, 150);
-  doc.text('* This is a computer generated receipt.', pageWidth / 2, pageHeight - 12, { align: 'center' });
-
-  // Trigger Download
+  doc.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
   doc.save(`Receipt_${receiptNo}.pdf`);
 };
