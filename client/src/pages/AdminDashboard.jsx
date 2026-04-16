@@ -368,6 +368,7 @@ const AdminDashboard = () => {
               </table>
             </div>
           </div>
+          </div>
         )}
 
         {/* Tab Content: Events */}
@@ -404,7 +405,7 @@ const AdminDashboard = () => {
                       </div>
                       <button onClick={() => handleDeleteEvent(ev._id)} className="text-red-500 p-2"><FaTrash/></button>
                     </div>
-                    {ev.image && <img src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${ev.image}`} alt="update" className="w-full h-32 object-cover rounded-lg" />}
+                    {ev.image && <img src={ev.image.startsWith('http') ? ev.image : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${ev.image}`} alt="update" className="w-full h-32 object-cover rounded-lg" />}
                     <p className="text-gray-400 text-sm">{ev.description}</p>
                     {ev.comments && ev.comments.map(c => (
                       <div key={c._id} className="flex justify-between bg-black/40 p-2 mb-1 rounded text-xs text-gray-300">
@@ -440,7 +441,7 @@ const AdminDashboard = () => {
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-h-[500px] overflow-y-auto pr-2">
                 {gallery.length === 0 ? <p className="text-gray-500">No images.</p> : gallery.map(img => (
                   <div key={img._id} className="relative group rounded-xl overflow-hidden aspect-square border border-white/10">
-                    <img src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${img.imageUrl}`} alt={img.description} className="w-full h-full object-cover" />
+                    <img src={img.imageUrl.startsWith('http') ? img.imageUrl : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${img.imageUrl}`} alt={img.description} className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-center items-center gap-2 p-4 text-center">
                       <p className="text-white text-xs line-clamp-2">{img.description}</p>
                       <button onClick={() => handleDeleteImage(img._id)} className="bg-red-500 text-white p-2 rounded-full mt-2 hover:bg-red-600">

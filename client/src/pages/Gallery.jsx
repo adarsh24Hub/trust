@@ -38,7 +38,7 @@ const Gallery = () => {
               <div key={photo._id || index} className="group relative rounded-2xl overflow-hidden aspect-video border border-white/10 shadow-xl">
                 <div className="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-all z-10 duration-500"></div>
                 <img 
-                  src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${photo.imageUrl}`} 
+                  src={photo.imageUrl.startsWith('http') ? photo.imageUrl : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${photo.imageUrl}`} 
                   alt={photo.description || `Gallery ${index + 1}`} 
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
                 />

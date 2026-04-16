@@ -95,7 +95,7 @@ const Events = () => {
                   {/* Top Header & Photo */}
                   {event.image && (
                     <div className="w-full h-64 md:h-80 lg:h-96 relative">
-                      <img src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${event.image}`} alt="Event upload" className="w-full h-full object-cover" />
+                      <img src={event.image.startsWith('http') ? event.image : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${event.image}`} alt="Event upload" className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                     </div>
                   )}
