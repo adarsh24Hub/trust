@@ -17,7 +17,7 @@ const Donate = () => {
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const UPI_ID = 'satyamstr1@okaxis';
+  const UPI_ID = 'adarshofficial2408@okicici';
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -59,7 +59,7 @@ const Donate = () => {
       const { order, donationId } = orderResponse.data;
 
       const options = {
-        key: 'rzp_test_Se1DTBVFvB0sFS', // Usually from env in Vite using import.meta.env, hardcoded here as requested
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: order.amount,
         currency: order.currency,
         name: "Mata Kali Trust",
