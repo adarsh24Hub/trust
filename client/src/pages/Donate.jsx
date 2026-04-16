@@ -59,7 +59,7 @@ const Donate = () => {
       const { order, donationId } = orderResponse.data;
 
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_Se1DTBVFvB0sFS',
         amount: order.amount,
         currency: order.currency,
         name: "Mata Kali Trust",
