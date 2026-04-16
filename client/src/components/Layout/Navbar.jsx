@@ -38,9 +38,9 @@ const Navbar = () => {
       {showAnnouncement && (
         <div className="bg-gradient-to-r from-saffron to-gold text-white text-center py-2.5 px-4 text-xs sm:text-sm font-bold shadow-md relative z-50 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 tracking-wide pr-10">
           <span className="drop-shadow-sm">{t('announcement.text')}</span>
-          <a href="https://razorpay.me/@matakali" target="_blank" rel="noreferrer" className="bg-black/20 hover:bg-black/40 px-4 py-1 rounded-full transition-colors shadow-inner flex items-center gap-1 border border-white/20 whitespace-nowrap">
+          <Link to="/donate" className="bg-black/20 hover:bg-black/40 px-4 py-1 rounded-full transition-colors shadow-inner flex items-center gap-1 border border-white/20 whitespace-nowrap">
             {t('announcement.linkText')} &rarr;
-          </a>
+          </Link>
           <button 
             onClick={() => setShowAnnouncement(false)} 
             className="absolute right-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white transition-colors"
@@ -102,12 +102,12 @@ const Navbar = () => {
                 <span className={i18n.language === 'hi' ? 'text-saffron font-extrabold' : ''}>हिंदी</span>
               </button>
 
-              <a
-                href="https://razorpay.me/@matakali" target="_blank" rel="noreferrer"
+              <Link
+                to="/donate"
                 className="bg-gradient-to-r from-saffron to-gold hover:from-saffron-dark hover:to-saffron text-white px-5 py-2 rounded-full font-bold shadow-lg shadow-saffron/30 hover:shadow-saffron/50 transition-all transform hover:-translate-y-0.5 text-sm"
               >
                 {t('nav.donate_now')}
-              </a>
+              </Link>
             </div>
           </div>
 
@@ -152,13 +152,13 @@ const Navbar = () => {
               </li>
             ))}
           </ul>
-          <a
-            href="https://razorpay.me/@matakali" target="_blank" rel="noreferrer"
+          <Link
+            to="/donate"
             onClick={() => setIsOpen(false)}
             className="bg-gradient-to-r from-saffron to-gold text-center text-white w-full py-3 rounded-md font-bold text-lg shadow-lg"
           >
             {t('nav.donate_now')}
-          </a>
+          </Link>
         </motion.div>
       )}
     </nav>

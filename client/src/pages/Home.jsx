@@ -114,9 +114,9 @@ const Home = () => {
               <span>2 {t('home.supporters')}</span>
             </div>
 
-            <a href="https://razorpay.me/@matakali" target="_blank" rel="noreferrer" className="inline-block bg-saffron text-white font-bold px-10 md:px-12 py-3 md:py-4 rounded-full hover:bg-saffron-dark transition-all text-lg md:text-xl shadow-lg border-b-4 border-saffron-dark active:border-b-0 active:translate-y-1">
+            <Link to="/donate" className="inline-block bg-saffron text-white font-bold px-10 md:px-12 py-3 md:py-4 rounded-full hover:bg-saffron-dark transition-all text-lg md:text-xl shadow-lg border-b-4 border-saffron-dark active:border-b-0 active:translate-y-1">
               {t('home.contribute_now')}
-            </a>
+            </Link>
           </motion.div>
         </div>
       </section>
