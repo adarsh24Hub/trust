@@ -9,7 +9,8 @@ const Donate = () => {
     name: '',
     contact: '',
     amount: '',
-    paymentMethod: 'UPI (QR Scan)',
+    paymentMethod: 'razorpay',
+    transactionId: '',
     note: ''
   });
   const [status, setStatus] = useState({ type: '', message: '' });
@@ -28,22 +29,113 @@ const Donate = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const handleRazorpayPayment = async () => {
     try {
-      setLoading(true);
-      setStatus({ type: 'info', message: 'Processing your donation...' });
-      
-      // Post to backend database
-      await axios.post('http://localhost:5000/api/donations', formData);
-      
-      setStatus({ type: 'success', message: 'Donation details submitted successfully! The admin will verify your payment shortly.' });
-      setFormData({ name: '', contact: '', amount: '', paymentMethod: 'UPI (QR Scan)', note: '' });
+      const res = await loadRazorpayScript();
+      if (!res) {
+        setStatus({ type: 'error', message: 'Razorpay SDK failed to load. Are you online?' });
+        setLoading(false);
+        return;
+      }
+
+      // Create Order
+      const orderResponse = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/donations/create-order`, {
+        name: formData.name,
+        contact: formData.contact,
+        amount: formData.amount,
+        note: formData.note
+      });
+
+      const { order, donationId } = orderResponse.data;
+
+      const options = {
+        key: 'rzp_test_Se1DTBVFvB0sFS', // Usually from env in Vite using import.meta.env, hardcoded here as requested
+        amount: order.amount,
+        currency: order.currency,
+        name: "Mata Kali Trust",
+        description: "Donation for Mandir Nirman",
+        order_id: order.id,
+        handler: async function (response) {
+          try {
+            setStatus({ type: 'info', message: 'Verifying payment...' });
+            const verifyRes = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/donations/verify-payment`, {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature
+            });
+            setStatus({ type: 'success', message: 'Payment verified! Thank you for your contribution. Receipt sent to your contact.' });
+            setFormData({ name: '', contact: '', amount: '', paymentMethod: 'razorpay', transactionId: '', note: '' });
+          } catch (err) {
+            setStatus({ type: 'error', message: 'Payment verification failed. Please contact admin.' });
+          }
+        },
+        prefill: {
+          name: formData.name,
+          contact: formData.contact,
+        },
+        theme: {
+          color: "#f97316"
+        }
+      };
+
+      const paymentObject = new window.Razorpay(options);
+      paymentObject.open();
+
+      paymentObject.on('payment.failed', function (response) {
+        setStatus({ type: 'error', message: 'Payment failed. Please try again.' });
+      });
+
     } catch (error) {
       console.error(error);
-      setStatus({ type: 'error', message: 'Failed to record donation. Please check your connection or contact admin.' });
+      setStatus({ type: 'error', message: 'Failed to initialize payment gateway.' });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUpiSubmission = async () => {
+    try {
+      if (!formData.transactionId) {
+        setStatus({ type: 'error', message: 'Transaction ID is required for manual UPI.' });
+        setLoading(false);
+        return;
+      }
+      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/donations/upi`, {
+         name: formData.name,
+         contact: formData.contact,
+         amount: formData.amount,
+         transactionId: formData.transactionId,
+         note: formData.note
+      });
+      setStatus({ type: 'success', message: 'Donation details submitted! Admin will verify your payment shortly.' });
+      setFormData({ name: '', contact: '', amount: '', paymentMethod: 'upi', transactionId: '', note: '' });
+    } catch (error) {
+      console.error(error);
+      setStatus({ type: 'error', message: error.response?.data?.message || 'Failed to submit UPI details.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setStatus({ type: 'info', message: 'Processing your request...' });
+
+    if (formData.paymentMethod === 'razorpay') {
+      await handleRazorpayPayment();
+    } else {
+      await handleUpiSubmission();
     }
   };
 
@@ -93,7 +185,7 @@ const Donate = () => {
           {/* Form Section */}
           <div className="bg-dark-light rounded-3xl p-8 border border-white/10 shadow-xl relative overflow-hidden">
             <h3 className="text-2xl font-bold text-white mb-6 border-b border-white/10 pb-4">Log Your Details</h3>
-            <p className="text-gray-400 text-sm mb-6">After making your payment via QR or Razorpay, please leave your details below so we can keep a record of your contribution.</p>
+            <p className="text-gray-400 text-sm mb-6">Choose Razorpay for instant verification, or UPI QR scan if you prefer to upload details manually.</p>
             
             {status.message && (
               <div className={`p-4 rounded-xl mb-6 flex items-start gap-3 ${
@@ -120,12 +212,14 @@ const Donate = () => {
               </div>
 
               <div>
-                <label className="block text-gray-400 mb-2 text-sm font-medium">Contact (Phone/Email)</label>
+                <label className="block text-gray-400 mb-2 text-sm font-medium">Contact (Email highly recommended)</label>
                 <input 
                   type="text" 
                   name="contact" 
                   value={formData.contact} 
                   onChange={handleChange} 
+                  required
+                  placeholder="For receipt delivery"
                   className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-saffron focus:bg-black transition-all"
                 />
               </div>
@@ -151,21 +245,35 @@ const Donate = () => {
                   onChange={handleChange} 
                   className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-saffron focus:bg-black transition-all appearance-none"
                 >
-                  <option value="UPI (QR Scan)">UPI (Scanned QR above)</option>
-                  <option value="Razorpay">Razorpay (Gateway Link)</option>
-                  <option value="Bank Transfer">Bank Transfer (NEFT/RTGS)</option>
+                  <option value="razorpay">Razorpay (Cards, NetBanking, Auto-UPI)</option>
+                  <option value="upi">Manual UPI (Scanned QR above)</option>
                 </select>
               </div>
 
+              {formData.paymentMethod === 'upi' && (
+                 <div>
+                   <label className="block text-gray-400 mb-2 text-sm font-medium">UPI Transaction ID <span className="text-red-500">*</span></label>
+                   <input 
+                     type="text" 
+                     name="transactionId" 
+                     value={formData.transactionId} 
+                     onChange={handleChange} 
+                     required={formData.paymentMethod === 'upi'}
+                     className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-saffron focus:bg-black transition-all"
+                     placeholder="e.g. 324567890123"
+                   />
+                 </div>
+              )}
+
               <div>
-                <label className="block text-gray-400 mb-2 text-sm font-medium">Transaction ID / {t('donate.message_optional')}</label>
+                <label className="block text-gray-400 mb-2 text-sm font-medium">{t('donate.message_optional')}</label>
                 <textarea 
                   name="note" 
                   value={formData.note} 
                   onChange={handleChange} 
                   rows="2"
                   className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-saffron focus:bg-black transition-all"
-                  placeholder="Paste transaction ref or leave a message..."
+                  placeholder="Leave a message..."
                 ></textarea>
               </div>
 
@@ -174,7 +282,7 @@ const Donate = () => {
                 disabled={loading}
                 className="w-full bg-gradient-to-r from-saffron to-gold text-black font-bold text-lg py-4 rounded-xl mt-2 shadow-[0_0_15px_rgba(249,115,22,0.3)] hover:shadow-[0_0_25px_rgba(249,115,22,0.6)] transition-all disabled:opacity-50"
               >
-                {loading ? 'Submitting...' : 'Submit Donation Details'}
+                {loading ? 'Processing...' : (formData.paymentMethod === 'razorpay' ? 'Pay & Donate Now' : 'Submit UPI Details')}
               </button>
             </form>
           </div>
