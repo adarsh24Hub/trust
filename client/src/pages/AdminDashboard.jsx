@@ -14,6 +14,8 @@ const AdminDashboard = () => {
   
   const [newEvent, setNewEvent] = useState({ title: '', description: '', date: '', image: null });
   const [newImage, setNewImage] = useState({ description: '', file: null });
+  const [newCashDonation, setNewCashDonation] = useState({ name: '', contact: '', amount: '', note: '' });
+  const [cashLoading, setCashLoading] = useState(false);
   
   const [loading, setLoading] = useState(false);
   const [donationSearch, setDonationSearch] = useState('');
@@ -128,6 +130,24 @@ const AdminDashboard = () => {
   };
 
   // DONATION HANDLERS
+  const handleAddCashDonation = async (e) => {
+    e.preventDefault();
+    try {
+      setCashLoading(true);
+      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/donations/admin`, 
+      { ...newCashDonation, method: 'cash' },
+      { headers: { Authorization: `Bearer ${token}` } });
+      setNewCashDonation({ name: '', contact: '', amount: '', note: '' });
+      fetchDonations();
+      fetchStats();
+      alert('Cash donation logged & verified successfully!');
+    } catch(err) {
+      alert('Failed to log donation.');
+    } finally {
+      setCashLoading(false);
+    }
+  };
+
   const handleApproveUpi = async (id) => {
     if(!window.confirm('Approve this UPI payment? This will add to total and send a receipt.')) return;
     try {
@@ -256,54 +276,73 @@ const AdminDashboard = () => {
 
         {/* Tab Content: Donations */}
         {activeTab === 'donations' && (
-          <div className="bg-dark-light rounded-3xl border border-white/5 shadow overflow-hidden">
-            <div className="p-6 border-b border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
-              <h2 className="text-xl font-bold text-white">Donation Records</h2>
-              <input 
-                type="text" 
-                placeholder="Search..." 
-                value={donationSearch}
-                onChange={(e) => setDonationSearch(e.target.value)}
-                className="bg-black/50 border border-white/10 rounded-lg px-4 py-1.5 text-sm text-white focus:outline-none focus:border-saffron w-full md:w-64"
-              />
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-dark-light rounded-3xl border border-white/5 shadow p-6 md:col-span-1 h-fit">
+              <h2 className="text-xl font-bold text-saffron mb-6 border-b border-white/10 pb-4">Log Cash Donation</h2>
+              <form onSubmit={handleAddCashDonation} className="flex flex-col gap-4">
+                <div>
+                  <input type="text" value={newCashDonation.name} onChange={(e) => setNewCashDonation({...newCashDonation, name: e.target.value})} className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-saffron" placeholder="Donor Name" required />
+                </div>
+                <div>
+                  <input type="text" value={newCashDonation.contact} onChange={(e) => setNewCashDonation({...newCashDonation, contact: e.target.value})} className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-saffron" placeholder="Contact/Email (Optional)" />
+                </div>
+                <div>
+                  <input type="number" value={newCashDonation.amount} onChange={(e) => setNewCashDonation({...newCashDonation, amount: e.target.value})} className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-saffron" placeholder="Amount (₹)" required />
+                </div>
+                <div>
+                  <textarea value={newCashDonation.note} onChange={(e) => setNewCashDonation({...newCashDonation, note: e.target.value})} className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-saffron" placeholder="Note (Optional)" rows="2" />
+                </div>
+                <button type="submit" disabled={cashLoading} className="bg-saffron text-black font-bold py-3 rounded-lg hover:bg-gold transition-colors">{cashLoading ? 'Logging...' : 'Add Verified Record'}</button>
+              </form>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-black/50 text-gray-400">
-                    <th className="p-4 font-medium">Donor Detail</th>
-                    <th className="p-4 font-medium">Amount</th>
-                    <th className="p-4 font-medium">Method</th>
-                    <th className="p-4 font-medium">Status & Info</th>
-                    <th className="p-4 font-medium text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="text-gray-300 divide-y divide-white/5">
-                  {filteredDonations.length === 0 ? (
-                    <tr>
-                      <td colSpan="5" className="p-8 text-center text-gray-500">No donations found.</td>
+
+            <div className="bg-dark-light rounded-3xl border border-white/5 shadow overflow-hidden md:col-span-2">
+              <div className="p-6 border-b border-white/10 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <h2 className="text-xl font-bold text-white">Donation Records</h2>
+                <input 
+                  type="text" 
+                  placeholder="Search..." 
+                  value={donationSearch}
+                  onChange={(e) => setDonationSearch(e.target.value)}
+                  className="bg-black/50 border border-white/10 rounded-lg px-4 py-1.5 text-sm text-white focus:outline-none focus:border-saffron w-full sm:w-64"
+                />
+              </div>
+              <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-black/50 text-gray-400 sticky top-0 backdrop-blur-md">
+                      <th className="p-4 font-medium">Donor Detail</th>
+                      <th className="p-4 font-medium">Amount</th>
+                      <th className="p-4 font-medium">Status & Info</th>
+                      <th className="p-4 font-medium text-right">Actions</th>
                     </tr>
-                  ) : (
-                    filteredDonations.map(d => (
-                      <tr key={d._id} className="hover:bg-white/5 transition-colors">
-                        <td className="p-4">
-                          <div className="font-medium text-white">{d.name}</div>
-                          {d.contact && <div className="text-xs text-gray-500 mt-1">{d.contact}</div>}
-                        </td>
-                        <td className="p-4 font-bold text-saffron">₹{d.amount.toLocaleString()}</td>
-                        <td className="p-4">
-                          <span className="uppercase text-xs font-bold font-mono">{d.method}</span>
-                          {d.transactionId && <div className="text-xs text-gray-500 mt-1 truncate max-w-[120px]">Txn: {d.transactionId}</div>}
-                        </td>
-                        <td className="p-4">
-                          <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                            d.status === 'verified' ? 'bg-green-500/20 text-green-400' : 
-                            d.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' : 
-                            'bg-red-500/20 text-red-400'
-                          }`}>
-                            {d.status.toUpperCase()}
-                          </span>
-                          {d.receiptId && <div className="text-[10px] text-gray-500 mt-1">Receipt: {d.receiptId}</div>}
+                  </thead>
+                  <tbody className="text-gray-300 divide-y divide-white/5">
+                    {filteredDonations.length === 0 ? (
+                      <tr>
+                        <td colSpan="4" className="p-8 text-center text-gray-500">No donations found.</td>
+                      </tr>
+                    ) : (
+                      filteredDonations.map(d => (
+                        <tr key={d._id} className="hover:bg-white/5 transition-colors">
+                          <td className="p-4">
+                            <div className="font-medium text-white">{d.name}</div>
+                            {d.contact && <div className="text-xs text-gray-500 mt-1">{d.contact}</div>}
+                          </td>
+                          <td className="p-4 font-bold text-saffron">₹{d.amount.toLocaleString()}</td>
+                          <td className="p-4">
+                            <div className="flex flex-col items-start gap-1">
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                                d.status === 'verified' ? 'bg-green-500/20 text-green-400' : 
+                                d.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' : 
+                                'bg-red-500/20 text-red-400'
+                              }`}>
+                                {d.status}
+                              </span>
+                              <span className="uppercase text-xs font-bold font-mono text-gray-500">{d.method}</span>
+                            </div>
+                            {d.receiptId && <div className="text-[10px] text-gray-500 mt-1">Rec: {d.receiptId}</div>}
+                            {d.transactionId && <div className="text-[10px] text-gray-500 mt-0">Txn: {d.transactionId}</div>}
                         </td>
                         <td className="p-4 text-right">
                           <div className="flex justify-end gap-2 text-sm">

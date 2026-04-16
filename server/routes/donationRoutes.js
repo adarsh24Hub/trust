@@ -9,7 +9,8 @@ const {
   approveUpiDonation,
   rejectUpiDonation,
   deleteDonation, 
-  getDonationStats 
+  getDonationStats,
+  createAdminDonation
 } = require('../controllers/donationController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -28,6 +29,7 @@ router.post('/upi', createUpiDonation);
 
 // Admin Protected Routes
 router.route('/').get(protect, getDonations);
+router.post('/admin', protect, createAdminDonation);
 router.route('/:id').delete(protect, deleteDonation);
 router.put('/:id/approve', protect, approveUpiDonation);
 router.put('/:id/reject', protect, rejectUpiDonation);

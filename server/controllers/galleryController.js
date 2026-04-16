@@ -17,8 +17,8 @@ const uploadImage = async (req, res) => {
       return res.status(400).json({ message: 'No image uploaded' });
     }
     
-    // Using simple local storage upload
-    const imageUrl = `/uploads/${req.file.filename}`;
+    // Cloudinary automatically provides the full URL in req.file.path
+    const imageUrl = req.file.path;
     const newImage = await Gallery.create({
       imageUrl,
       description: req.body.description || ''
@@ -35,14 +35,6 @@ const deleteImage = async (req, res) => {
     const image = await Gallery.findById(req.params.id);
     if (!image) {
       return res.status(404).json({ message: 'Image not found' });
-    }
-
-    // Try to remove file from fs
-    const fileName = path.basename(image.imageUrl);
-    const filePath = path.join(__dirname, '..', 'uploads', fileName);
-    
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
     }
 
     await Gallery.findByIdAndDelete(req.params.id);

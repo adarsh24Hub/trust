@@ -15,9 +15,9 @@ const createEvent = async (req, res) => {
     const { title, description, date } = req.body;
     let imagePath = '';
     
-    // If multer successfully uploaded a file
+    // If multer successfully uploaded a file to Cloudinary
     if (req.file) {
-      imagePath = `/uploads/${req.file.filename}`;
+      imagePath = req.file.path;
     }
 
     const event = await Event.create({ title, description, date, image: imagePath });

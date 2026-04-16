@@ -271,6 +271,45 @@ const getDonationStats = async (req, res) => {
   }
 };
 
+// 7. Admin Create Offline Donation
+const createAdminDonation = async (req, res) => {
+  try {
+    const { name, contact, amount, method, note } = req.body;
+    
+    // Automatically verifying because it's added by Admin
+    const receiptId = `RCPT-${Math.floor(100000 + Math.random() * 900000)}`;
+
+    const donation = await Donation.create({
+      name,
+      contact,
+      amount,
+      method: method || 'offline',
+      status: 'verified',
+      receiptId,
+      note
+    });
+
+    if (donation.contact && donation.contact.includes('@')) {
+      await sendEmail({
+        to: donation.contact,
+        subject: 'Donation Received - Mata Kali Sadanand Sadbhavana Trust',
+        html: `
+          <h3>Dear ${donation.name},</h3>
+          <p>Thank you for your generous contribution of <strong>₹${donation.amount}</strong>.</p>
+          <p>Your donation has been officially logged by the Trust administrators. Your receipt ID is <strong>${receiptId}</strong>.</p>
+          <br>
+          <p>May Maa Kali bless you and your family.</p>
+          <p>Regards,<br>Mata Kali Sadanand Sadbhavana Trust</p>
+        `
+      });
+    }
+
+    res.status(201).json(donation);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 module.exports = { 
   getDonations, 
   createUpiDonation, 
@@ -280,5 +319,6 @@ module.exports = {
   approveUpiDonation,
   rejectUpiDonation,
   deleteDonation, 
-  getDonationStats 
+  getDonationStats,
+  createAdminDonation
 };
