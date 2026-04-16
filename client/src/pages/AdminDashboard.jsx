@@ -226,13 +226,21 @@ const AdminDashboard = () => {
     <div className="bg-dark min-h-screen pt-28 pb-20 px-4 relative">
       <div className="container mx-auto">
         <div className="flex justify-between items-center mb-10">
-          <h1 className="text-3xl font-bold text-white">{t('admin.dashboard_title')} <span className="text-saffron">Panel</span></h1>
-          <button 
-            onClick={handleLogout}
-            className="flex items-center gap-2 bg-red-900/50 text-red-400 hover:bg-red-900 hover:text-white px-4 py-2 rounded-lg transition-colors border border-red-500/30"
-          >
-            <FaSignOutAlt /> {t('admin.logout')}
-          </button>
+          <h1 className="text-3xl font-bold text-white">{t('admin.dashboard_title')} <span className="text-saffron">Panel v2.1</span></h1>
+          <div className="flex gap-4">
+            <button 
+              onClick={() => downloadReceiptPDF({receiptId: 'TEST-123', name: 'Admin Test', amount: 501, method: 'Test'})}
+              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-bold"
+            >
+              <FaDownload /> Test Receipt
+            </button>
+            <button 
+              onClick={handleLogout}
+              className="flex items-center gap-2 bg-red-900/50 text-red-400 hover:bg-red-900 hover:text-white px-4 py-2 rounded-lg transition-colors border border-red-500/30"
+            >
+              <FaSignOutAlt /> {t('admin.logout')}
+            </button>
+          </div>
         </div>
 
         {/* Stats row */}
