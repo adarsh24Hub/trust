@@ -78,7 +78,7 @@ const createRazorpayOrder = async (req, res) => {
       note
     });
 
-    res.status(201).json({ order, donationId: donation._id });
+    res.status(201).json({ order, donationId: donation._id, razorpayKeyId: process.env.RAZORPAY_KEY_ID });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
