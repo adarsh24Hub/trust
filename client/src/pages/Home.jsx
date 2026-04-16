@@ -1,12 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaMapMarkerAlt, FaPhoneAlt, FaStar, FaClock } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaPhoneAlt, FaStar, FaClock, FaHeart } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
+import axios from 'axios';
 
 const Home = () => {
   const [targetAmount] = useState(1000000); // 10 Lakhs
-  const [currentAmount] = useState(2); 
+  const [currentAmount, setCurrentAmount] = useState(0); 
+  const [supporters, setSupporters] = useState(0);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/donations/stats`);
+        if (res.data && res.data.success) {
+          setCurrentAmount(res.data.totalAmount || 0);
+          setSupporters(res.data.totalDonors || 0);
+        }
+      } catch (err) {
+        console.error("Stats fetching failed");
+      }
+    };
+    fetchStats();
+  }, []);
 
   const progressPercentage = Math.min((currentAmount / targetAmount) * 100, 100);
   const { t } = useTranslation();
@@ -78,44 +95,67 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Donation Campaign Section */}
+      {/* Donation Campaign Section - Polished Premium UI */}
       <section className="py-24 relative bg-dark">
+        {/* Decorative background glow */}
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-saffron/5 rounded-full blur-[120px] pointer-events-none"></div>
+
         <div className="container mx-auto px-4 z-10 relative">
           <motion.div 
-            initial={{ opacity: 0, scale: 0.8, y: 100 }}
+            initial={{ opacity: 0, scale: 0.9, y: 50 }}
             whileInView={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ type: 'spring', duration: 1, bounce: 0.4 }}
-            viewport={{ once: true, margin: "-100px" }}
-            className="max-w-4xl mx-auto bg-dark-light border border-white/10 rounded-3xl p-8 md:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.5)] shadow-saffron/5 relative overflow-hidden text-center my-12"
+            transition={{ type: 'spring', duration: 1.2, bounce: 0.3 }}
+            viewport={{ once: true, margin: "-50px" }}
+            className="max-w-4xl mx-auto bg-gradient-to-br from-black/80 to-dark-light backdrop-blur-xl border border-white/10 rounded-[2rem] p-8 md:p-14 shadow-[0_30px_60px_rgba(0,0,0,0.8)] relative overflow-hidden text-center my-12"
           >
-            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-saffron to-gold"></div>
+            {/* Top accent line */}
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-saffron via-gold to-saffron animate-pulse"></div>
             
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">{t('home.campaign')} <span className="text-saffron">{t('home.campaign_name')}</span></h2>
-            <p className="text-sm md:text-base text-gray-400 mb-8">{t('home.campaign_subtitle')}</p>
-
-            {/* Progress Bar */}
-            <div className="mb-4 flex justify-between text-sm md:text-lg font-bold">
-              <span className="text-saffron">₹{currentAmount.toLocaleString()} {t('home.raised')}</span>
-              <span className="text-gray-400">{t('home.goal')} ₹{targetAmount.toLocaleString()}</span>
+            <div className="w-16 h-16 mx-auto bg-saffron/10 rounded-full flex items-center justify-center mb-6 border border-saffron/20 shadow-[0_0_20px_rgba(249,115,22,0.3)]">
+              <FaHeart className="text-saffron text-2xl animate-bounce" />
             </div>
-            <div className="w-full bg-black rounded-full h-6 mb-6 overflow-hidden border border-white/10 p-1 relative">
-              <motion.div 
-                initial={{ width: 0 }}
-                whileInView={{ width: `${progressPercentage}%` }}
-                transition={{ duration: 1.5, ease: "easeOut" }}
-                className="bg-gradient-to-r from-saffron to-gold h-full rounded-full relative"
+
+            <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-3">
+              {t('home.campaign')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-saffron to-gold">{t('home.campaign_name')}</span>
+            </h2>
+            <p className="text-sm md:text-lg text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+              {t('home.campaign_subtitle')}
+            </p>
+
+            {/* Progress Container */}
+            <div className="bg-black/40 p-6 md:p-8 rounded-3xl border border-white/5 mb-10 shadow-inner">
+              <div className="mb-4 flex flex-col md:flex-row justify-between items-center text-lg md:text-xl font-bold gap-2">
+                <span className="text-saffron drop-shadow-md">₹{currentAmount.toLocaleString()} <span className="text-sm font-medium text-gray-400 ml-1">{t('home.raised')}</span></span>
+                <span className="text-white drop-shadow-md">₹{targetAmount.toLocaleString()} <span className="text-sm font-medium text-gray-400 ml-1">{t('home.goal')}</span></span>
+              </div>
+              
+              <div className="w-full bg-dark rounded-full h-8 overflow-hidden border border-white/10 p-1 relative shadow-inner">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  whileInView={{ width: `${progressPercentage}%` }}
+                  transition={{ duration: 2, ease: "easeOut" }}
+                  className="bg-gradient-to-r from-saffron to-gold h-full rounded-full relative shadow-[0_0_15px_rgba(249,115,22,0.6)]"
+                >
+                  <div className="absolute top-0 right-0 bottom-0 w-20 bg-gradient-to-l from-white/40 to-transparent blur-sm"></div>
+                </motion.div>
+              </div>
+              
+              <div className="text-sm md:text-base text-gray-400 flex justify-between mt-4 font-medium px-2">
+                <span className="bg-black/50 px-4 py-1.5 rounded-full border border-white/10">{progressPercentage.toFixed(2)}% {t('home.completed')}</span>
+                <span className="bg-black/50 px-4 py-1.5 rounded-full border border-white/10 flex items-center gap-2"><FaStar className="text-gold text-xs"/> {supporters} {t('home.supporters')}</span>
+              </div>
+            </div>
+
+            <Link to="/donate" className="group inline-flex items-center justify-center bg-gradient-to-r from-saffron to-gold text-black font-extrabold px-12 py-4 rounded-full transition-all text-xl shadow-[0_0_30px_rgba(249,115,22,0.4)] hover:shadow-[0_0_40px_rgba(249,115,22,0.7)] hover:-translate-y-1">
+              <span>{t('home.contribute_now')}</span>
+              <motion.span 
+                className="ml-2 inline-block"
+                initial={{ x: 0 }}
+                animate={{ x: 5 }}
+                transition={{ repeat: Infinity, duration: 0.8, repeatType: "reverse" }}
               >
-                {/* Glow effect */}
-                <div className="absolute top-0 right-0 bottom-0 w-10 bg-white/30 blur-md"></div>
-              </motion.div>
-            </div>
-            <div className="text-xs md:text-sm text-gray-400 flex justify-between mb-8">
-              <span>{progressPercentage.toFixed(2)}% {t('home.completed')}</span>
-              <span>2 {t('home.supporters')}</span>
-            </div>
-
-            <Link to="/donate" className="inline-block bg-saffron text-white font-bold px-10 md:px-12 py-3 md:py-4 rounded-full hover:bg-saffron-dark transition-all text-lg md:text-xl shadow-lg border-b-4 border-saffron-dark active:border-b-0 active:translate-y-1">
-              {t('home.contribute_now')}
+                &rarr;
+              </motion.span>
             </Link>
           </motion.div>
         </div>
