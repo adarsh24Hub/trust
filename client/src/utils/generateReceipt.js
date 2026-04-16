@@ -1,4 +1,4 @@
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
 
 export const downloadReceiptPDF = async (donation) => {
   const doc = new jsPDF({
@@ -72,10 +72,10 @@ export const downloadReceiptPDF = async (donation) => {
   const rowH = 8;
   
   // Data Mapping
-  const receiptNo = donation.receiptId || \`RCPT-MKS-\${Math.floor(Math.random() * 899999 + 100000)}\`;
+  const receiptNo = donation.receiptId || `RCPT-MKS-${Math.floor(Math.random() * 899999 + 100000)}`;
   const dateStr = donation.createdAt ? new Date(donation.createdAt).toLocaleDateString() : new Date().toLocaleDateString();
   const donorName = donation.name || 'Anonymous';
-  const amount = donation.amount ? \`Rs. \${donation.amount.toLocaleString()}\` : '-';
+  const amount = donation.amount ? `Rs. ${donation.amount.toLocaleString()}` : '-';
   const paymentMode = donation.method ? donation.method.toUpperCase() : '-';
   const txnId = donation.transactionId || donation.paymentId || 'N/A';
 
@@ -110,5 +110,5 @@ export const downloadReceiptPDF = async (donation) => {
   doc.text('* This is a computer generated receipt.', pageWidth / 2, pageHeight - 12, { align: 'center' });
 
   // Trigger Download
-  doc.save(\`Receipt_\${receiptNo}.pdf\`);
+  doc.save(`Receipt_${receiptNo}.pdf`);
 };
