@@ -1,5 +1,7 @@
 const express = require('express');
 const dotenv = require('dotenv');
+dotenv.config();
+
 const cors = require('cors');
 const connectDB = require('./config/db');
 
@@ -9,9 +11,6 @@ const donationRoutes = require('./routes/donationRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 const galleryRoutes = require('./routes/galleryRoutes');
 const rateLimit = require('express-rate-limit');
-
-dotenv.config();
-
 const path = require('path');
 
 const app = express();
