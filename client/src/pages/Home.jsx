@@ -125,29 +125,7 @@ const Home = () => {
               {t('home.campaign_subtitle')}
             </p>
 
-            {/* Progress Container */}
-            <div className="bg-black/40 p-6 md:p-8 rounded-3xl border border-white/5 mb-10 shadow-inner">
-              <div className="mb-4 flex flex-col md:flex-row justify-between items-center text-lg md:text-xl font-bold gap-2">
-                <span className="text-saffron drop-shadow-md">₹{currentAmount.toLocaleString()} <span className="text-sm font-medium text-gray-400 ml-1">{t('home.raised')}</span></span>
-                <span className="text-white drop-shadow-md">₹{targetAmount.toLocaleString()} <span className="text-sm font-medium text-gray-400 ml-1">{t('home.goal')}</span></span>
-              </div>
-              
-              <div className="w-full bg-dark rounded-full h-8 overflow-hidden border border-white/10 p-1 relative shadow-inner">
-                <motion.div 
-                  initial={{ width: 0 }}
-                  whileInView={{ width: `${progressPercentage}%` }}
-                  transition={{ duration: 2, ease: "easeOut" }}
-                  className="bg-gradient-to-r from-saffron to-gold h-full rounded-full relative shadow-[0_0_15px_rgba(249,115,22,0.6)]"
-                >
-                  <div className="absolute top-0 right-0 bottom-0 w-20 bg-gradient-to-l from-white/40 to-transparent blur-sm"></div>
-                </motion.div>
-              </div>
-              
-              <div className="text-sm md:text-base text-gray-400 flex justify-between mt-4 font-medium px-2">
-                <span className="bg-black/50 px-4 py-1.5 rounded-full border border-white/10">{progressPercentage.toFixed(2)}% {t('home.completed')}</span>
-                <span className="bg-black/50 px-4 py-1.5 rounded-full border border-white/10 flex items-center gap-2"><FaStar className="text-gold text-xs"/> {supporters} {t('home.supporters')}</span>
-              </div>
-            </div>
+
 
             <Link to="/donate" className="group inline-flex items-center justify-center bg-gradient-to-r from-saffron to-gold text-black font-extrabold px-12 py-4 rounded-full transition-all text-xl shadow-[0_0_30px_rgba(249,115,22,0.4)] hover:shadow-[0_0_40px_rgba(249,115,22,0.7)] hover:-translate-y-1">
               <span>{t('home.contribute_now')}</span>
