@@ -29,21 +29,24 @@ const Home = () => {
   const { t } = useTranslation();
 
   return (
-    <div className="bg-dark min-h-screen">
-      {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        {/* Background Image Setup */}
-        <div className="absolute inset-0 z-0">
-          <img 
-            src="/temple_hero_image.png" 
-            alt="Mata Kali Dham Temple" 
-            className="w-full h-full object-cover opacity-40 blur-[2px] scale-105"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
-        </div>
+    <div className="min-h-screen relative overflow-hidden">
+      
+      {/* Global Fixed Background */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <img 
+          src="/temple_hero_image.png" 
+          alt="Mata Kali Dham Temple Backdrop" 
+          className="w-full h-full object-cover opacity-50 blur-[2px] scale-105"
+        />
+        <div className="absolute inset-0 bg-black/60"></div>
+      </div>
 
-        {/* Hero Content */}
-        <div className="container mx-auto px-4 z-10 text-center flex flex-col items-center mt-16">
+      {/* Content wrapper with z-index */}
+      <div className="relative z-10 flex flex-col gap-0">
+        {/* Hero Section */}
+        <section className="relative min-h-[90vh] flex items-center justify-center pt-20 pb-10">
+          {/* Hero Content */}
+          <div className="container mx-auto px-4 z-10 text-center flex flex-col items-center mt-6">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -96,7 +99,7 @@ const Home = () => {
       </section>
 
       {/* Donation Campaign Section - Polished Premium UI */}
-      <section className="py-24 relative bg-dark">
+      <section className="py-16 relative bg-transparent">
         {/* Decorative background glow */}
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-saffron/5 rounded-full blur-[120px] pointer-events-none"></div>
 
@@ -106,7 +109,7 @@ const Home = () => {
             whileInView={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ type: 'spring', duration: 1.2, bounce: 0.3 }}
             viewport={{ once: true, margin: "-50px" }}
-            className="max-w-4xl mx-auto bg-gradient-to-br from-black/80 to-dark-light backdrop-blur-xl border border-white/10 rounded-[2rem] p-8 md:p-14 shadow-[0_30px_60px_rgba(0,0,0,0.8)] relative overflow-hidden text-center my-12"
+            className="max-w-4xl mx-auto bg-gradient-to-br from-black/80 to-dark-light backdrop-blur-xl border border-white/10 rounded-[2rem] p-8 md:p-14 shadow-[0_30px_60px_rgba(0,0,0,0.8)] relative overflow-hidden text-center my-6"
           >
             {/* Top accent line */}
             <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-saffron via-gold to-saffron animate-pulse"></div>
@@ -162,7 +165,7 @@ const Home = () => {
       </section>
 
       {/* Story Section */}
-      <section className="py-24 bg-dark">
+      <section className="py-16 bg-transparent pb-32">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center gap-16">
             <div className="md:w-1/2">
@@ -188,6 +191,9 @@ const Home = () => {
           </div>
         </div>
       </section>
+      
+      {/* End Content Wrapper */}
+      </div>
     </div>
   );
 };

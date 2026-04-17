@@ -11,6 +11,7 @@ import Donate from './pages/Donate';
 import Achievements from './pages/Achievements';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
+import AudioPlayer from './components/AudioPlayer';
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -26,6 +27,7 @@ const Layout = ({ children }) => {
       <main className="grow">
         {children}
       </main>
+      <AudioPlayer />
       {!isAdminRoute && <Footer />}
     </div>
   );
